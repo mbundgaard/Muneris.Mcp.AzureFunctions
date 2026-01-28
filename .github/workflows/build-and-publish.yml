@@ -1,16 +1,13 @@
-name: Build and Publish
+name: Build
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-  release:
-    types: [published]
 
 env:
   DOTNET_VERSION: '8.0.x'
-  PACKAGE_PROJECT: 'src/Muneris.Mcp.AzureFunctions/Muneris.Mcp.AzureFunctions.csproj'
 
 jobs:
   build:
@@ -32,30 +29,3 @@ jobs:
 
       - name: Test
         run: dotnet test --configuration Release --no-build --verbosity normal
-
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-
-    permissions:
-      packages: write
-      contents: read
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Extract version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-      - name: Pack
-        run: dotnet pack ${{ env.PACKAGE_PROJECT }} --configuration Release --output ./nupkg /p:Version=${{ steps.version.outputs.VERSION }}
-
-      - name: Push to GitHub Packages
-        run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/mbundgaard/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
