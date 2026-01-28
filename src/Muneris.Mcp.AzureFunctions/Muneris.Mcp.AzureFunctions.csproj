@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+		<!-- NuGet Package Metadata -->
+		<PackageId>Muneris.Mcp.AzureFunctions</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>Martin Bundgaard</Authors>
+		<Company>Muneris ApS</Company>
+		<Copyright>Copyright © 2025 Muneris ApS</Copyright>
+		<Description>Build MCP (Model Context Protocol) servers on Azure Functions with Streamable HTTP transport, attribute-based tool definitions, POCO parameter binding, and pluggable authentication.</Description>
+		<PackageTags>mcp;azure-functions;model-context-protocol;ai;claude;llm;anthropic</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>icon.png</PackageIcon>
+
+		<!-- Repository -->
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/mbundgaard/Muneris.Mcp.AzureFunctions</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/mbundgaard/Muneris.Mcp.AzureFunctions</PackageProjectUrl>
+
+		<!-- Source Link (enables debugging into package source) -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.21.0" />
+		<PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.1.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+		<None Include="..\..\icon.png" Pack="true" PackagePath="\" Condition="Exists('..\..\icon.png')" />
+	</ItemGroup>
+</Project>
