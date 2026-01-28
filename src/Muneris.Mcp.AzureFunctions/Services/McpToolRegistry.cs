@@ -274,7 +274,11 @@ public sealed class McpToolRegistry
     {
         if (!_tools.TryGetValue(context.ToolName, out var tool))
         {
-            throw new InvalidOperationException($"Tool not found: {context.ToolName}");
+            throw new InvalidOperationException(
+                $"Tool '{context.ToolName}' not found. " +
+                $"Registered tools: [{string.Join(", ", _tools.Keys)}]. " +
+                "Ensure the tool method has [McpTool] attribute and the containing class is registered " +
+                "with AddMcp(mcp => mcp.AddToolsFromType<YourToolClass>()) in Program.cs.");
         }
 
         object? instance = null;

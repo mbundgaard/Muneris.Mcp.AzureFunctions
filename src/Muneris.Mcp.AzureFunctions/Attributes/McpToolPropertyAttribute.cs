@@ -4,6 +4,38 @@ namespace Muneris.Mcp.AzureFunctions.Attributes;
 /// Defines a parameter for an MCP tool.
 /// Apply to the tool method or parameter to describe its input parameters.
 /// </summary>
+/// <example>
+/// <para><b>Basic string parameter:</b></para>
+/// <code>
+/// [McpTool("greet", Description = "Greets a user")]
+/// [McpToolProperty("name", Type = "string", Description = "Name to greet", Required = true)]
+/// public string Greet(string name) =&gt; $"Hello, {name}!";
+/// </code>
+/// </example>
+/// <example>
+/// <para><b>Enum and numeric constraints:</b></para>
+/// <code>
+/// [McpTool("search", Description = "Searches items")]
+/// [McpToolProperty("query", Type = "string", Description = "Search query", Required = true, MinLength = 1, MaxLength = 100)]
+/// [McpToolProperty("category", Type = "string", Description = "Category filter", Enum = new[] { "food", "drinks", "desserts" })]
+/// [McpToolProperty("limit", Type = "integer", Description = "Max results", Minimum = 1, Maximum = 100, Default = "10")]
+/// public object Search(string query, string? category, int limit = 10) { /* ... */ }
+/// </code>
+/// </example>
+/// <example>
+/// <para><b>Format and pattern validation:</b></para>
+/// <code>
+/// [McpTool("create_user", Description = "Creates a user account")]
+/// [McpToolProperty("email", Type = "string", Description = "User email", Required = true, Format = "email")]
+/// [McpToolProperty("phone", Type = "string", Description = "Phone number", Pattern = @"^\+?[1-9]\d{1,14}$")]
+/// [McpToolProperty("birthdate", Type = "string", Description = "Date of birth", Format = "date")]
+/// public object CreateUser(string email, string? phone, string? birthdate) { /* ... */ }
+/// </code>
+/// </example>
+/// <remarks>
+/// For complex tools with many parameters, consider using POCO binding instead.
+/// See <see cref="McpToolAttribute"/> for POCO binding examples.
+/// </remarks>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter, AllowMultiple = true, Inherited = false)]
 public sealed class McpToolPropertyAttribute : Attribute
 {

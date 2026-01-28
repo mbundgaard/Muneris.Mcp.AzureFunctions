@@ -7,6 +7,97 @@ namespace Muneris.Mcp.AzureFunctions.Auth;
 /// Interface for validating MCP request authentication.
 /// Implement this interface to provide custom authentication logic (JWT, API keys, Azure AD, etc.).
 /// </summary>
+/// <example>
+/// <para><b>JWT Bearer token validator:</b></para>
+/// <code>
+/// public class JwtBearerValidator : IMcpAuthValidator
+/// {
+///     private readonly TokenValidationParameters _validationParameters;
+///     private readonly JwtSecurityTokenHandler _tokenHandler = new();
+///
+///     public JwtBearerValidator(IConfiguration config)
+///     {
+///         _validationParameters = new TokenValidationParameters
+///         {
+///             ValidateIssuer = true,
+///             ValidIssuer = config["Jwt:Issuer"],
+///             ValidateAudience = true,
+///             ValidAudience = config["Jwt:Audience"],
+///             ValidateLifetime = true,
+///             IssuerSigningKey = new SymmetricSecurityKey(
+///                 Encoding.UTF8.GetBytes(config["Jwt:Secret"]!))
+///         };
+///     }
+///
+///     public Task&lt;ClaimsPrincipal?&gt; ValidateRequestAsync(
+///         HttpRequestData request, CancellationToken cancellationToken = default)
+///     {
+///         if (!request.Headers.TryGetValues("Authorization", out var values))
+///             return Task.FromResult&lt;ClaimsPrincipal?&gt;(null);
+///
+///         var authHeader = values.FirstOrDefault();
+///         if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+///             return Task.FromResult&lt;ClaimsPrincipal?&gt;(null);
+///
+///         var token = authHeader.Substring("Bearer ".Length);
+///         try
+///         {
+///             var principal = _tokenHandler.ValidateToken(token, _validationParameters, out _);
+///             return Task.FromResult&lt;ClaimsPrincipal?&gt;(principal);
+///         }
+///         catch
+///         {
+///             return Task.FromResult&lt;ClaimsPrincipal?&gt;(null);
+///         }
+///     }
+///
+///     public string GetAuthError(HttpRequestData request) =&gt; "Invalid or expired token";
+///     public string? GetWwwAuthenticateHeader() =&gt; "Bearer realm=\"mcp\"";
+/// }
+/// </code>
+/// </example>
+/// <example>
+/// <para><b>API key validator:</b></para>
+/// <code>
+/// public class ApiKeyValidator : IMcpAuthValidator
+/// {
+///     private readonly HashSet&lt;string&gt; _validKeys;
+///
+///     public ApiKeyValidator(IConfiguration config)
+///     {
+///         _validKeys = config.GetSection("ApiKeys").Get&lt;string[]&gt;()?.ToHashSet()
+///             ?? new HashSet&lt;string&gt;();
+///     }
+///
+///     public Task&lt;ClaimsPrincipal?&gt; ValidateRequestAsync(
+///         HttpRequestData request, CancellationToken cancellationToken = default)
+///     {
+///         if (!request.Headers.TryGetValues("X-API-Key", out var values))
+///             return Task.FromResult&lt;ClaimsPrincipal?&gt;(null);
+///
+///         var apiKey = values.FirstOrDefault();
+///         if (string.IsNullOrEmpty(apiKey) || !_validKeys.Contains(apiKey))
+///             return Task.FromResult&lt;ClaimsPrincipal?&gt;(null);
+///
+///         var claims = new[] { new Claim(ClaimTypes.Name, "api-client") };
+///         var identity = new ClaimsIdentity(claims, "ApiKey");
+///         return Task.FromResult&lt;ClaimsPrincipal?&gt;(new ClaimsPrincipal(identity));
+///     }
+///
+///     public string GetAuthError(HttpRequestData request) =&gt; "Invalid API key";
+///     public string? GetWwwAuthenticateHeader() =&gt; null; // No challenge for API keys
+/// }
+/// </code>
+/// </example>
+/// <remarks>
+/// Register your validator in Program.cs:
+/// <code>
+/// services.AddMcp(mcp =&gt; {
+///     mcp.AddAuthValidator&lt;JwtBearerValidator&gt;();
+///     // ... register tools and resources
+/// });
+/// </code>
+/// </remarks>
 public interface IMcpAuthValidator
 {
     /// <summary>

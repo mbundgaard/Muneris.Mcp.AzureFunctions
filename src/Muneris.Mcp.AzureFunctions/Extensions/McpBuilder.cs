@@ -7,6 +7,41 @@ namespace Muneris.Mcp.AzureFunctions.Extensions;
 /// <summary>
 /// Builder for configuring MCP services.
 /// </summary>
+/// <example>
+/// <para><b>Full configuration example:</b></para>
+/// <code>
+/// services.AddMcp(mcp =&gt;
+/// {
+///     // Configure server options
+///     mcp.Configure(options =&gt;
+///     {
+///         options.ServerName = "Restaurant MCP Server";
+///         options.ServerVersion = "1.0.0";
+///         options.Instructions = "This server provides tools for managing restaurant operations.";
+///         options.AllowedOrigins = new List&lt;string&gt; { "https://myapp.com" };
+///     });
+///
+///     // Register tools from specific types
+///     mcp.AddToolsFromType&lt;OrderTools&gt;();
+///     mcp.AddToolsFromType&lt;MenuTools&gt;();
+///
+///     // Or register all tools from an assembly
+///     mcp.AddToolsFromAssemblyContaining&lt;OrderTools&gt;();
+///
+///     // Register resources
+///     mcp.AddResourcesFromType&lt;MenuResources&gt;();
+///     mcp.AddResourcesFromType&lt;ConfigResources&gt;();
+///
+///     // Register authentication validator
+///     mcp.AddAuthValidator&lt;JwtBearerValidator&gt;();
+///
+///     // Or use a factory for complex initialization
+///     mcp.AddAuthValidator(sp =&gt; new JwtBearerValidator(
+///         sp.GetRequiredService&lt;IConfiguration&gt;(),
+///         sp.GetRequiredService&lt;ILogger&lt;JwtBearerValidator&gt;&gt;()));
+/// });
+/// </code>
+/// </example>
 public sealed class McpBuilder
 {
     private readonly IServiceCollection _services;

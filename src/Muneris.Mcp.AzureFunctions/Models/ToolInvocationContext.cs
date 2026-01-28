@@ -8,6 +8,76 @@ namespace Muneris.Mcp.AzureFunctions.Models;
 /// Context passed to MCP tool handlers during invocation.
 /// Provides access to arguments, authentication info, and the underlying HTTP request.
 /// </summary>
+/// <example>
+/// <para><b>Accessing tool arguments:</b></para>
+/// <code>
+/// [McpTool("process_order", Description = "Processes an order")]
+/// public async Task&lt;string&gt; ProcessOrder(ToolInvocationContext ctx)
+/// {
+///     var orderId = ctx.GetString("orderId") ?? throw new ArgumentException("orderId required");
+///     var quantity = ctx.GetInt32("quantity") ?? 1;
+///     var expedite = ctx.GetBoolean("expedite") ?? false;
+///
+///     // Get complex objects
+///     var options = ctx.GetValue&lt;ProcessingOptions&gt;("options");
+///
+///     return $"Processed order {orderId}";
+/// }
+/// </code>
+/// </example>
+/// <example>
+/// <para><b>Accessing authenticated user information:</b></para>
+/// <code>
+/// [McpTool("get_profile", Description = "Gets the current user's profile")]
+/// public async Task&lt;object&gt; GetProfile(ToolInvocationContext ctx)
+/// {
+///     // Get user claims from the authenticated principal
+///     var userId = ctx.User?.FindFirst("sub")?.Value
+///         ?? throw new UnauthorizedAccessException("Not authenticated");
+///     var email = ctx.User?.FindFirst("email")?.Value;
+///     var roles = ctx.User?.FindAll("role").Select(c =&gt; c.Value).ToList();
+///
+///     return new { userId, email, roles };
+/// }
+/// </code>
+/// </example>
+/// <example>
+/// <para><b>Using session and protocol information:</b></para>
+/// <code>
+/// [McpTool("debug_info", Description = "Returns debug information", AllowAnonymous = true)]
+/// public object GetDebugInfo(ToolInvocationContext ctx)
+/// {
+///     return new
+///     {
+///         sessionId = ctx.SessionId,
+///         protocolVersion = ctx.ProtocolVersion,
+///         isAuthenticated = ctx.User?.Identity?.IsAuthenticated ?? false,
+///         clientIp = ctx.Request.Headers.TryGetValues("X-Forwarded-For", out var ips)
+///             ? ips.FirstOrDefault() : null
+///     };
+/// }
+/// </code>
+/// </example>
+/// <example>
+/// <para><b>Using cancellation token for long-running operations:</b></para>
+/// <code>
+/// [McpTool("generate_report", Description = "Generates a detailed report")]
+/// public async Task&lt;McpToolResult&gt; GenerateReport(ToolInvocationContext ctx, ReportRequest request)
+/// {
+///     // Pass cancellation token to async operations
+///     var data = await _dataService.FetchDataAsync(request.DateRange, ctx.CancellationToken);
+///
+///     // Check for cancellation periodically in long operations
+///     foreach (var item in data)
+///     {
+///         ctx.CancellationToken.ThrowIfCancellationRequested();
+///         await ProcessItemAsync(item, ctx.CancellationToken);
+///     }
+///
+///     return McpToolResult.Success("Report generated successfully");
+/// }
+/// </code>
+/// </example>
 public sealed class ToolInvocationContext
 {
     /// <summary>

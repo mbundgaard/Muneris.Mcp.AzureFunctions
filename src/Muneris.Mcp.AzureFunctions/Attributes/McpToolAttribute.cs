@@ -3,6 +3,67 @@ namespace Muneris.Mcp.AzureFunctions.Attributes;
 /// <summary>
 /// Marks a method as an MCP tool that can be invoked by MCP clients.
 /// </summary>
+/// <example>
+/// <para><b>Simple tool with attribute-based parameters:</b></para>
+/// <code>
+/// [McpTool("greet", Description = "Greets a user by name")]
+/// [McpToolProperty("name", Type = "string", Description = "Name to greet", Required = true)]
+/// public string Greet(string name) =&gt; $"Hello, {name}!";
+/// </code>
+/// </example>
+/// <example>
+/// <para><b>Tool with POCO binding (recommended for complex inputs):</b></para>
+/// <code>
+/// [McpTool("create_order", Description = "Creates a new order", Title = "Create Order")]
+/// public async Task&lt;McpToolResult&gt; CreateOrder(ToolInvocationContext ctx, CreateOrderRequest request)
+/// {
+///     var userId = ctx.User?.FindFirst("sub")?.Value;
+///     // Process order...
+///     return McpToolResult.Success($"Order {orderId} created");
+/// }
+///
+/// public class CreateOrderRequest
+/// {
+///     [Description("Customer ID")]
+///     [Required]
+///     public string CustomerId { get; set; } = "";
+///
+///     [Description("Order items")]
+///     [Required]
+///     public List&lt;OrderItem&gt; Items { get; set; } = new();
+///
+///     [Description("Priority level")]
+///     [McpAllowedValues("low", "normal", "high")]
+///     public string Priority { get; set; } = "normal";
+/// }
+/// </code>
+/// </example>
+/// <example>
+/// <para><b>Anonymous tool (no authentication required):</b></para>
+/// <code>
+/// [McpTool("get_menu", Description = "Gets the restaurant menu", AllowAnonymous = true, ReadOnlyHint = true)]
+/// public async Task&lt;object&gt; GetMenu()
+/// {
+///     return await _menuService.GetMenuAsync();
+/// }
+/// </code>
+/// </example>
+/// <example>
+/// <para><b>Tool with behavioral hints:</b></para>
+/// <code>
+/// [McpTool("delete_order",
+///     Description = "Cancels and deletes an order",
+///     Title = "Delete Order",
+///     DestructiveHint = true,    // Warns LLM this is destructive
+///     IdempotentHint = true,     // Safe to retry
+///     OpenWorldHint = true)]     // Interacts with external systems
+/// public async Task&lt;string&gt; DeleteOrder(ToolInvocationContext ctx, string orderId)
+/// {
+///     await _orderService.DeleteAsync(orderId, ctx.CancellationToken);
+///     return $"Order {orderId} deleted";
+/// }
+/// </code>
+/// </example>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
 public sealed class McpToolAttribute : Attribute
 {

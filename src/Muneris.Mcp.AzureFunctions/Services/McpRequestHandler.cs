@@ -13,6 +13,47 @@ namespace Muneris.Mcp.AzureFunctions.Services;
 /// <summary>
 /// Handles MCP JSON-RPC requests over Streamable HTTP transport.
 /// </summary>
+/// <example>
+/// <para><b>Azure Function endpoint setup:</b></para>
+/// <code>
+/// public class McpEndpoint
+/// {
+///     private readonly McpRequestHandler _handler;
+///
+///     public McpEndpoint(McpRequestHandler handler)
+///     {
+///         _handler = handler;
+///     }
+///
+///     [Function("Mcp")]
+///     public Task&lt;HttpResponseData&gt; HandleMcp(
+///         [HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", "delete", Route = "mcp")]
+///         HttpRequestData request)
+///     {
+///         return _handler.HandleAsync(request);
+///     }
+/// }
+/// </code>
+/// <para>
+/// The handler automatically processes POST requests for JSON-RPC calls and returns
+/// 405 Method Not Allowed for GET/DELETE (v1 JSON-only transport).
+/// </para>
+/// <para>
+/// Test the endpoint with curl:
+/// </para>
+/// <code>
+/// # Initialize session
+/// curl -X POST https://localhost:7071/api/mcp \
+///   -H "Content-Type: application/json" \
+///   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}'
+///
+/// # List tools (use session ID from initialize response)
+/// curl -X POST https://localhost:7071/api/mcp \
+///   -H "Content-Type: application/json" \
+///   -H "Mcp-Session-Id: &lt;session-id&gt;" \
+///   -d '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+/// </code>
+/// </example>
 public sealed class McpRequestHandler
 {
     private const string DefaultProtocolVersion = "2025-03-26";

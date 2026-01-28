@@ -8,6 +8,37 @@ namespace Muneris.Mcp.AzureFunctions.Extensions;
 /// <summary>
 /// Extension methods for configuring MCP services.
 /// </summary>
+/// <example>
+/// <para><b>Complete Program.cs setup:</b></para>
+/// <code>
+/// var host = new HostBuilder()
+///     .ConfigureFunctionsWorkerDefaults()
+///     .ConfigureServices(services =&gt;
+///     {
+///         services.AddMcp(mcp =&gt;
+///         {
+///             // Configure server metadata
+///             mcp.Configure(options =&gt;
+///             {
+///                 options.ServerName = "My Restaurant MCP Server";
+///                 options.ServerVersion = "1.0.0";
+///                 options.Instructions = "Use this server to manage restaurant orders and menus.";
+///             });
+///
+///             // Register tools and resources
+///             mcp.AddToolsFromType&lt;OrderTools&gt;();
+///             mcp.AddToolsFromType&lt;MenuTools&gt;();
+///             mcp.AddResourcesFromType&lt;MenuResources&gt;();
+///
+///             // Register authentication
+///             mcp.AddAuthValidator&lt;JwtBearerValidator&gt;();
+///         });
+///     })
+///     .Build();
+///
+/// host.Run();
+/// </code>
+/// </example>
 public static class McpServiceCollectionExtensions
 {
     /// <summary>
@@ -16,6 +47,17 @@ public static class McpServiceCollectionExtensions
     /// <param name="services">The service collection.</param>
     /// <param name="configure">Action to configure the MCP builder.</param>
     /// <returns>The service collection for chaining.</returns>
+    /// <example>
+    /// <code>
+    /// services.AddMcp(mcp =&gt;
+    /// {
+    ///     mcp.Configure(options =&gt; options.ServerName = "My Server");
+    ///     mcp.AddToolsFromType&lt;MyTools&gt;();
+    ///     mcp.AddResourcesFromType&lt;MyResources&gt;();
+    ///     mcp.AddAuthValidator&lt;MyAuthValidator&gt;();
+    /// });
+    /// </code>
+    /// </example>
     public static IServiceCollection AddMcp(this IServiceCollection services, Action<McpBuilder> configure)
     {
         var builder = new McpBuilder(services);
@@ -109,6 +151,12 @@ public static class McpServiceCollectionExtensions
     /// <typeparam name="TValidator">The validator type.</typeparam>
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection for chaining.</returns>
+    /// <example>
+    /// <code>
+    /// services.AddMcpServer();
+    /// services.AddMcpAuthValidator&lt;JwtBearerValidator&gt;();
+    /// </code>
+    /// </example>
     public static IServiceCollection AddMcpAuthValidator<TValidator>(this IServiceCollection services)
         where TValidator : class, IMcpAuthValidator
     {
@@ -122,6 +170,13 @@ public static class McpServiceCollectionExtensions
     /// <typeparam name="TTools">The type containing tools.</typeparam>
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection for chaining.</returns>
+    /// <example>
+    /// <code>
+    /// services.AddMcpServer();
+    /// services.AddMcpTools&lt;OrderTools&gt;();
+    /// services.AddMcpTools&lt;MenuTools&gt;();
+    /// </code>
+    /// </example>
     public static IServiceCollection AddMcpTools<TTools>(this IServiceCollection services)
         where TTools : class
     {
@@ -140,6 +195,13 @@ public static class McpServiceCollectionExtensions
     /// <typeparam name="TResources">The type containing resources.</typeparam>
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection for chaining.</returns>
+    /// <example>
+    /// <code>
+    /// services.AddMcpServer();
+    /// services.AddMcpResources&lt;MenuResources&gt;();
+    /// services.AddMcpResources&lt;ConfigResources&gt;();
+    /// </code>
+    /// </example>
     public static IServiceCollection AddMcpResources<TResources>(this IServiceCollection services)
         where TResources : class
     {
