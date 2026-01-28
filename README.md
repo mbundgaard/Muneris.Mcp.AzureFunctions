@@ -1,8 +1,5 @@
 # Muneris.Mcp.AzureFunctions
 
-[![NuGet](https://img.shields.io/nuget/v/Muneris.Mcp.AzureFunctions.svg)](https://www.nuget.org/packages/Muneris.Mcp.AzureFunctions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 Build MCP (Model Context Protocol) servers on Azure Functions with a clean, attribute-based API.
 
 ## Why This Package?
